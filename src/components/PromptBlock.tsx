@@ -49,8 +49,18 @@ export function PromptBlock({ block }: PromptBlockProps) {
     )
   }
 
+  const handleClick = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('button')) {
+      return
+    }
+    setIsEditing(true)
+  }
+
   return (
-    <div className="group p-3 bg-muted/30 rounded-md hover:bg-muted/50 transition-colors">
+    <div
+      className="group p-3 bg-muted/30 rounded-md hover:bg-muted/50 transition-colors cursor-pointer"
+      onClick={handleClick}
+    >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           {block.blockTitle && (
@@ -63,15 +73,6 @@ export function PromptBlock({ block }: PromptBlockProps) {
           </p>
         </div>
         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button
-            size="sm"
-            variant="ghost"
-            className="h-6 w-6 p-0"
-            onClick={() => setIsEditing(true)}
-          >
-            <span className="sr-only">Edit</span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-          </Button>
           <Button
             size="sm"
             variant="ghost"
