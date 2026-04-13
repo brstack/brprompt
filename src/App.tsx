@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { DndContext, DragOverlay } from '@dnd-kit/core'
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core'
 import { Header } from '@/components/Header'
@@ -17,7 +17,13 @@ function App() {
   const [newSectionTitle, setNewSectionTitle] = useState('')
   const [activeCard, setActiveCard] = useState<PromptCard | null>(null)
 
-  const { sections, addSection, selectCard } = usePromptStore()
+  const { sections, addSection, selectCard, loadFromServer, isLoading, error } = usePromptStore()
+
+  useEffect(() => {
+    const controller = new AbortController()
+    loadFromServer(controller.signal)
+    return () => controller.abort()
+  }, [loadFromServer])
 
   const handleAddSection = () => {
     if (newSectionTitle.trim()) {
@@ -55,37 +61,51 @@ function App() {
         <Header onOpenExport={() => setExportOpen(true)} />
 
         <main className="max-w-6xl mx-auto px-6 py-8 space-y-8">
-          <ServiceFilter />
+          {error && (
+            <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
+              {error} - Make sure PocketBase is running on port 8090
+            </div>
+          )}
 
-          {sections.map((section) => (
-            <BlockSection key={section.id} section={section} />
-          ))}
-
-          {showAddSection ? (
-            <div className="w-full p-6 border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-3">
-              <Input
-                placeholder="Section Title (e.g., composition, character)"
-                value={newSectionTitle}
-                onChange={(e) => setNewSectionTitle(e.target.value)}
-                autoFocus
-                className="max-w-md"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleAddSection()
-                  if (e.key === 'Escape') setShowAddSection(false)
-                }}
-              />
-              <div className="flex gap-2">
-                <Button size="sm" onClick={handleAddSection}>Add Section</Button>
-                <Button size="sm" variant="outline" onClick={() => setShowAddSection(false)}>Cancel</Button>
-              </div>
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12 text-muted-foreground">
+              Loading...
             </div>
           ) : (
-            <button
-              className="w-full h-24 border-2 border-dashed rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 hover:bg-muted/30 transition-colors"
-              onClick={() => setShowAddSection(true)}
-            >
-              + Add Section
-            </button>
+            <>
+              <ServiceFilter />
+
+              {sections.map((section) => (
+                <BlockSection key={section.id} section={section} />
+              ))}
+
+              {showAddSection ? (
+                <div className="w-full p-6 border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-3">
+                  <Input
+                    placeholder="Section Title (e.g., composition, character)"
+                    value={newSectionTitle}
+                    onChange={(e) => setNewSectionTitle(e.target.value)}
+                    autoFocus
+                    className="max-w-md"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleAddSection()
+                      if (e.key === 'Escape') setShowAddSection(false)
+                    }}
+                  />
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={handleAddSection}>Add Section</Button>
+                    <Button size="sm" variant="outline" onClick={() => setShowAddSection(false)}>Cancel</Button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  className="w-full h-24 border-2 border-dashed rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 hover:bg-muted/30 transition-colors"
+                  onClick={() => setShowAddSection(true)}
+                >
+                  + Add Section
+                </button>
+              )}
+            </>
           )}
         </main>
 
