@@ -2,7 +2,7 @@ import { useDroppable } from '@dnd-kit/core'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { usePromptStore } from '@/stores/promptStore'
-import { copyPromptsToClipboard } from '@/utils/clipboard'
+import { copyPromptsToClipboard, generatePromptText } from '@/utils/clipboard'
 import { useState } from 'react'
 
 interface ExportSidebarProps {
@@ -77,6 +77,17 @@ export function ExportSidebar({ open, onClose }: ExportSidebarProps) {
           </div>
         )}
       </div>
+
+      {selectedCards.length > 0 && (
+        <div className="px-4 pb-2">
+          <textarea
+            readOnly
+            value={generatePromptText(selectedCards)}
+            className="w-full h-32 p-2 text-sm border rounded-md bg-muted/50 resize-none"
+            onFocus={(e) => e.target.select()}
+          />
+        </div>
+      )}
 
       <div className="flex gap-2 p-4 border-t">
         <Button
